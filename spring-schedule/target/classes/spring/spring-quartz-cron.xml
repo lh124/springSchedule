@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- 定义了一个新的专门用于自定义任务调度方法的工厂任务类 -->
+	<bean id="methodTaskFactory"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">	<!-- 定义要执行的任务程序类对象 -->
+			<bean class="org.spring.schedule.MyTask" />	<!-- 任务执行类 -->
+		</property>
+		<property name="targetMethod" value="taskquart" />	<!-- 设置执行任务的处理方法 -->
+	</bean>
+
+	<!-- 要定义任务触发的工厂类，使用CRON进行任务的触发操作 -->
+	<bean id="cronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="methodTaskFactory" />	<!-- 定义每一次间隔触发是要执行的具体的任务详情 -->
+		<property name="cronExpression" value="* * * * * ?" />	<!-- 设置任务的触发时间 -->
+	</bean>
+	<!-- 配置任务的执行调度器 -->
+	<bean id="scheduleFactory"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<array>
+				<ref bean="cronTrigger" /> <!-- 设置任务触发器 -->
+			</array>
+		</property>
+	</bean>
+</beans>
+
+<!-- 
+
+	<bean id="myTask" class="org.spring.schedule.MyTask" />
+	<task:scheduled-tasks>	进行SpringTask任务的调度配置
+		<task:scheduled ref="myTask" method="taskquart" cron="* * * * * ?" />	定义要使用的任务类
+	</task:scheduled-tasks>
+ -->
